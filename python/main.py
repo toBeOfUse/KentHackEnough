@@ -85,11 +85,11 @@ def on_key_event(key: keyboard.KeyboardEvent):
                 if not just_backspaced:
                     keyboard.press_and_release("backspace")
                     just_backspaced = True
-                keyboard.press(keymap[key.name])
+                keyboard.press(keymap[key.name].lower())
             else:
-                keyboard.press(key.name)
+                keyboard.press(key.scan_code)
         else:
-            keyboard.press(key.name)
+            keyboard.press(key.scan_code)
     else:
         if key.name in pressed_keys:
             pressed_keys.remove(key.name)

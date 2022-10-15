@@ -22,3 +22,8 @@ setKeyMapPair('T', 'U');
 setKeyMapPair('X', ',');
 setKeyMapPair('Y', 'Y');
 setKeyMapPair('Z', '.');
+
+keymap[":"] = "A"
+keymap["{"] = "Q"
+keymap["<"] = "X"
+keymap[">"] = "Z"
