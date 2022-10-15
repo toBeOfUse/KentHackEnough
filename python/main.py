@@ -77,6 +77,8 @@ def on_key_event(key: keyboard.KeyboardEvent):
     if key.event_type == "down":
         if key.name=="space" and "space" not in pressed_keys:
             just_backspaced = False
+        elif key.name == "space" and "space" in pressed_keys:
+            return False
         pressed_keys.add(key.name)
         if key.name != "space" and "space" in pressed_keys:
             if key.name in keymap:
