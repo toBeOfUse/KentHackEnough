@@ -4,7 +4,7 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: "singlehanded",
+    title: "SingleHanded.Tech",
     htmlAttrs: {
       lang: "en",
     },
@@ -55,7 +55,10 @@ export default {
 
       config.module.rules.push({
         test: /\.vue\.svg$/,
-        use: ["babel-loader", "vue-svg-loader"],
+        use: [
+          "babel-loader",
+          { loader: "vue-svg-loader", options: { svgo: false } },
+        ],
       });
     },
   },
