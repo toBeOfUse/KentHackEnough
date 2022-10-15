@@ -13,8 +13,13 @@
       </button>
     </div>
     <client-only>
-      <editor-content :editor="editor" />
+      <editor-content
+        :editor="editor"
+        class="shrink overflow-y-auto"
+        ref="editorElement"
+      />
     </client-only>
+    <keyboard-graphic width="100%" height="auto" class="my-2 shrink-0" />
   </div>
 </template>
 
@@ -22,10 +27,12 @@
 import { Editor, EditorContent } from "@tiptap/vue-2";
 import StarterKit from "@tiptap/starter-kit";
 import keymap from "./keymap.js";
+import KeyboardGraphic from "~/assets/keyboard.vue.svg";
 
 export default {
   components: {
     EditorContent,
+    KeyboardGraphic,
   },
 
   data() {
@@ -38,14 +45,14 @@ export default {
     this.editor = new Editor({
       content: `<h1>Try it out!</h1><p>This rich text editor will let you practice your one-handed typing skills.
         Remember, as you hold space, the keyboard is mirrored and the letters you would normally type with your
-        left hand should now be typed with your right - and vice versa. The mirrored layout means that you can
+        left hand should now be typed with your right - and vice versa. The mirrored layout means that you will
         transfer your muscle memory from e.g. your left pinky to your right pinky - surprisingly smoothly.</p>
         <p>Try typing some text below this:</p><p></p>`,
       extensions: [StarterKit],
     });
 
     const type = (text) => {
-      this.editor.commands.insertContent(text);
+      if (this.editor.isFocused) this.editor.commands.insertContent(text);
     };
 
     const backspace = () => {
@@ -55,6 +62,33 @@ export default {
         to: cursorPos,
       });
       this.editor.commands.deleteSelection();
+    };
+
+    const sheet = document.createElement("style");
+    document.head.appendChild(sheet);
+    const pressedKeys = new Set();
+
+    const setKeyboardStyle = () => {
+      let style = "#g2221 {fill: white;} ";
+      style += "#g2206 {fill: white;} ";
+      style += "#g2193 {fill: white;} ";
+      style += "#g2235 {fill: white;} ";
+      style += "#rect950 {fill:inherit;} ";
+      if (pressedKeys.has(" ")) style += "#normalLetterGroup {opacity: 0.3;} ";
+      else style += "#mirrorLetterGroup {opacity: 0.3;} ";
+      const aliases = {
+        ";": "semicolon",
+        ".": "period",
+        ",": "comma",
+        "[": "openbracket",
+      };
+      for (const key of pressedKeys) {
+        if (key in aliases || key.match(/[a-z]/i)) {
+          const key_name = aliases[key] || key;
+          style += "#" + key_name + " {fill: darkgray;} ";
+        }
+      }
+      sheet.innerHTML = style;
     };
 
     let space = false;
@@ -89,10 +123,16 @@ export default {
           type(event.key);
         }
       }
-      console.log(space);
+      if (event.type == "keydown") {
+        pressedKeys.add(event.key);
+      } else {
+        pressedKeys.delete(event.key);
+      }
+      setKeyboardStyle();
     }
     window.addEventListener("keydown", keyListener, true);
     window.addEventListener("keyup", keyListener, true);
+    setKeyboardStyle();
   },
 
   beforeDestroy() {
