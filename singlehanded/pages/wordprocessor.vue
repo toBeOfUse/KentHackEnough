@@ -26,7 +26,7 @@
 <script>
 import { Editor, EditorContent } from "@tiptap/vue-2";
 import StarterKit from "@tiptap/starter-kit";
-import keymap from "./keymap.js";
+import keymap from "../scripts/keymap.js";
 import KeyboardGraphic from "~/assets/keyboard.vue.svg";
 
 export default {
