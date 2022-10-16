@@ -9,6 +9,7 @@
     <p>
       <a
         href="https://blog.xkcd.com/2007/08/14/mirrorboard-a-one-handed-keyboard-layout-for-the-lazy/"
+        target="_blank"
         >This</a
       >
       blog post from Randall Munroe of xkcd inspired me to implement a keyboard
