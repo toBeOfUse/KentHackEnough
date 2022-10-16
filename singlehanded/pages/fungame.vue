@@ -164,7 +164,17 @@ export default {
       return this.text[this.currentTextIndex];
     },
     currentTextPos() {
-      return 0;
+      let count = 0;
+      for (const shape of this.shapes) {
+        if (this.getShapeFractionDone(shape) > 1) {
+          if (!shape.isMeta) {
+            count += 1;
+          }
+        } else {
+          break;
+        }
+      }
+      return count;
     },
     upcomingText() {
       return this.currentText.substring(
@@ -202,6 +212,7 @@ export default {
       for (const seq of sequences) {
         if (seq.spaceHeld) {
           shapes.push({
+            isMeta: true,
             column: 0,
             contactTime: from - this.spaceBeforeLetter,
             length:
@@ -215,6 +226,7 @@ export default {
         }
         for (const l of seq.letters) {
           shapes.push({
+            isMeta: false,
             contactTime: from,
             length: this.letterDuration,
             letter: l,
