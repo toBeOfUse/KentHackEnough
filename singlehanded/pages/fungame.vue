@@ -19,6 +19,18 @@
         <br />
         <input type="radio" id="left" :value="false" v-model="rightHand" />
         <label for="left">Use Left Hand</label>
+        <br />
+        <label for="speed">Game Speed</label>
+        <input
+          min="0"
+          max="100"
+          type="range"
+          id="speed"
+          value="75"
+          @change="changeSpeed(Number($event.target.value))"
+          autocomplete="false"
+          ref="speedRange"
+        />
         <span class="text-sm underline block"
           ><a href="/">(go back home)</a></span
         >
@@ -97,7 +109,7 @@
                 bottom: col.bottom + '%',
               }"
               :id="'dest' + (i + 1)"
-              v-if="sparkleEnds[i] >= elapsedTicks"
+              v-if="sparkleEnds[i] > elapsedTicks"
             />
           </template>
         </div>
@@ -132,7 +144,7 @@ export default {
     timerID: -1,
     letterDuration: 0.08,
     spaceBeforeLetter: 0.4,
-    sparkleEnds: [-1, -1, -1, -1, -1],
+    sparkleEnds: [-100, -100, -100, -100, -100],
     points: 0,
     intro: true,
   }),
@@ -151,8 +163,28 @@ export default {
     });
     window.stopTimer = () => clearInterval(this.timerID);
     this.$refs.typingArea.focus();
+    this.$refs.speedRange.value = "75";
+    this.changeSpeed(75);
   },
   methods: {
+    changeSpeed(newValue) {
+      // we need to change the value of seconds per tick while keeping the
+      // number of elapsed ticks the same.
+      const ticksGoneBy = this.elapsedTicks;
+      // const oldSpeed = this.secondsPerTick;
+      const availableSpeeds = [0.5, 3];
+      const newSecondsPerTick =
+        (availableSpeeds[0] * newValue) / 100 +
+        availableSpeeds[1] * (1 - newValue / 100);
+      this.secondsPerTick = newSecondsPerTick;
+      this.timerStartedAt = Date.now() - ticksGoneBy * newSecondsPerTick * 1000;
+      if (this.currentTimer == -1) {
+        this.currentTimer = Date.now();
+      }
+      // if (start && !this.intro) {
+      //   this.startGame();
+      // }
+    },
     startGame() {
       this.intro = false;
       this.startTimer();
@@ -262,7 +294,7 @@ export default {
     shapes() {
       const shapes = [];
       const sequences = getSequences(this.currentText, this.rightHand);
-      let from = 1;
+      let from = this.spaceBeforeLetter;
       for (const seq of sequences) {
         if (seq.spaceHeld) {
           shapes.push({
@@ -315,7 +347,7 @@ export default {
   watch: {
     currentTextIndex() {
       this.startTimer();
-      this.sparkleEnds = [-1, -1, -1, -1, -1];
+      this.sparkleEnds = [-100, -100, -100, -100, -100];
       this.$refs.typingArea.value = "";
     },
   },
