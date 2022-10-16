@@ -2,14 +2,23 @@
   <div class="flex flex-row h-screen justify-center">
     <div class="w-1/6 border-2 border-black h-full flex flex-col p-2">
       <h2 class="text-lg">Choose a text to practice with:</h2>
-      <p
-        class="underline text-listing cursor-pointer my-2"
-        v-for="(t, i) in text"
-        :key="i"
-        @click="currentTextIndex = i"
-      >
-        {{ t.substring(0, 100) }}
-      </p>
+      <div class="h-full overflow-y-auto">
+        <p
+          class="underline text-listing cursor-pointer my-2"
+          v-for="(t, i) in text"
+          :key="i"
+          @click="currentTextIndex = i"
+        >
+          {{ t.substring(0, 100) }}
+        </p>
+      </div>
+      <div class="w-full">
+        <input type="radio" id="right" :value="true" v-model="rightHand" />
+        <label for="right">Use Right Hand</label>
+        <br />
+        <input type="radio" id="left" :value="false" v-model="rightHand" />
+        <label for="left">Use Left Hand</label>
+      </div>
     </div>
     <div class="h-full flex flex-col justify- w-1/2">
       <div class="h-full bg-amber-100 overflow-y-auto p-2">
@@ -22,7 +31,7 @@
               whatTheyTyped.charAt(i) != c
                 ? 'text-red-400'
                 : i < posInText
-                ? 'text-slate-400'
+                ? 'opacity-40'
                 : ''
             "
             :key="i"
@@ -57,6 +66,7 @@
           <div
             v-for="(c, j) in cs.letters"
             :key="j"
+            style="transform: translateY(-5px)"
             class="
               bg-white
               border-black border-2
@@ -139,7 +149,7 @@ export default {
         l != " " &&
         (!(l in fingers) ||
           (this.rightHand && fingers[l] < 5) ||
-          (!this.rightHand && fingers > 4));
+          (!this.rightHand && fingers[l] > 4));
       const getActualLetter = (letter) =>
         letter == " "
           ? "space"
