@@ -246,6 +246,8 @@ export default {
   watch: {
     currentTextIndex() {
       this.startTimer();
+      this.sparkleEnds = [-1, -1, -1, -1, -1];
+      this.$refs.typingArea.value = "";
     },
   },
 };
