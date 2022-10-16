@@ -58,8 +58,8 @@
               getShapeFractionDone(shape) > 0.9 &&
               !shape.won &&
               !shape.isMeta &&
-              !shape.letter == ' ' &&
-              !shape.letter == 'space'
+              shape.letter !== ' ' &&
+              shape.letter != 'space'
                 ? 'red'
                 : '',
           }"
@@ -333,6 +333,7 @@ export default {
   position: absolute;
   background-color: blue;
   opacity: 0.5;
+  font-size: 200%;
 }
 .key {
   position: absolute;

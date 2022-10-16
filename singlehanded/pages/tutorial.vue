@@ -44,9 +44,9 @@
       </div>
       <div class="h-full bg-amber-200">
         <textarea
-          class="resize-none m-2"
+          class="resize-none m-2 p-4"
           style="width: calc(100% - 1rem); height: calc(100% - 1rem)"
-          placeholder="copy the above text here..."
+          placeholder="Copy the above text here using one hand, holding the space bar to reach letters as indicated by the brackets below."
           autocomplete="off"
           ref="typingArea"
         ></textarea>
@@ -118,6 +118,7 @@ export default {
   watch: {
     currentTextIndex() {
       this.$refs.typingArea.value = "";
+      this.whatTheyTyped = "";
     },
   },
   computed: {
