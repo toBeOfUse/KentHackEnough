@@ -43,7 +43,12 @@
           v-for="shape in activeShapes"
           :key="shape.from"
           :style="getShapeGeometry(shape)"
-          :class="shape.column == 0 ? 'shape' : 'key'"
+          :class="
+            (shape.column == 0 && rightHand) ||
+            (shape.column == 4 && !rightHand)
+              ? 'shape'
+              : 'key'
+          "
         >
           <span class="floatingspan">
             {{
@@ -52,36 +57,29 @@
           </span>
         </div>
         <div class="dest-cont">
-          <img src="spacebar.svg" id="dest1" />
-          <img
-            src="sparkle.gif"
-            id="dest1"
-            v-if="sparkleEnds[0] >= elapsedTicks"
-          />
-          <img src="finger.svg" id="dest2" />
-          <img
-            src="sparkle.gif"
-            id="dest2"
-            v-if="sparkleEnds[1] >= elapsedTicks"
-          />
-          <img src="finger.svg" id="dest3" />
-          <img
-            src="sparkle.gif"
-            id="dest3"
-            v-if="sparkleEnds[2] >= elapsedTicks"
-          />
-          <img src="finger.svg" id="dest4" />
-          <img
-            src="sparkle.gif"
-            id="dest4"
-            v-if="sparkleEnds[3] >= elapsedTicks"
-          />
-          <img src="finger.svg" id="dest5" />
-          <img
-            src="sparkle.gif"
-            id="dest5"
-            v-if="sparkleEnds[4] >= elapsedTicks"
-          />
+          <template v-for="(col, i) in columns">
+            <img
+              :key="i"
+              :src="col.src"
+              :style="{
+                left: col.pos + '%',
+                height: col.height + '%',
+                bottom: col.bottom + '%',
+              }"
+              :id="'dest' + (i + 1)"
+            />
+            <img
+              :key="i + 'sparkle'"
+              src="sparkle.gif"
+              :style="{
+                left: col.pos + '%',
+                height: col.height + '%',
+                bottom: col.bottom + '%',
+              }"
+              :id="'dest' + (i + 1)"
+              v-if="sparkleEnds[i] >= elapsedTicks"
+            />
+          </template>
         </div>
       </div>
       <div class="w-full bg-amber-100">
@@ -148,7 +146,7 @@ export default {
     },
     getShapeGeometry(shape) {
       const fractionDone = this.getShapeFractionDone(shape);
-      const cols = [15, 45, 60, 75, 90];
+      const cols = this.columns.map((c) => c.pos);
       const heightPercent = shape.length * 100;
       return {
         top: fractionDone * 100 - heightPercent + "%",
@@ -160,6 +158,35 @@ export default {
     },
   },
   computed: {
+    columns() {
+      if (this.rightHand) {
+        return [
+          {
+            pos: 15,
+            height: 5,
+            bottom: 15,
+            src: "/spacebar.svg",
+          },
+          { pos: 45, height: 20, bottom: 0, src: "/finger.svg" },
+          { pos: 60, height: 20, bottom: 0, src: "/finger.svg" },
+          { pos: 75, height: 20, bottom: 0, src: "/finger.svg" },
+          { pos: 90, height: 20, bottom: 0, src: "/finger.svg" },
+        ];
+      } else {
+        return [
+          { pos: 10, height: 20, bottom: 0, src: "/finger.svg" },
+          { pos: 25, height: 20, bottom: 0, src: "/finger.svg" },
+          { pos: 40, height: 20, bottom: 0, src: "/finger.svg" },
+          { pos: 55, height: 20, bottom: 0, src: "/finger.svg" },
+          {
+            pos: 85,
+            height: 5,
+            bottom: 15,
+            src: "/spacebar.svg",
+          },
+        ];
+      }
+    },
     currentText() {
       return this.text[this.currentTextIndex];
     },
@@ -213,7 +240,7 @@ export default {
         if (seq.spaceHeld) {
           shapes.push({
             isMeta: true,
-            column: 0,
+            column: this.rightHand ? 0 : 4,
             contactTime: from - this.spaceBeforeLetter,
             length:
               from +
@@ -225,17 +252,31 @@ export default {
           });
         }
         for (const l of seq.letters) {
+          let column;
+          if (this.rightHand) {
+            if (l == " " || l == "space") {
+              column = 0;
+            } else {
+              const colMap = { 1: 4, 2: 3, 3: 2, 4: 1, 5: 1, 6: 2, 7: 3, 8: 4 };
+              column = colMap[fingers[l]];
+            }
+          } else {
+            if (l == " " || l == "space") {
+              column = 4;
+            } else {
+              const colMap = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 3, 6: 2, 7: 1, 8: 0 };
+              column = colMap[fingers[l]];
+            }
+          }
+          if (column === undefined) {
+            console.error("undef");
+          }
           shapes.push({
             isMeta: false,
             contactTime: from,
             length: this.letterDuration,
             letter: l,
-            column:
-              l == "space"
-                ? 0
-                : fingers[l] > 4
-                ? fingers[l] - 4
-                : 4 - fingers[l],
+            column,
           });
           from += this.ticksBetweenLetters;
         }
@@ -273,10 +314,10 @@ export default {
 }
 .dest-cont img {
   position: absolute;
-  bottom: 0;
+  /* bottom: 0; */
   transform: translateX(-50%);
 }
-#dest1 {
+/* #dest1 {
   left: 15%;
   height: 5%;
   bottom: 15%;
@@ -296,7 +337,7 @@ export default {
 #dest5 {
   left: 90%;
   height: 20%;
-}
+} */
 .floatingspan {
   position: absolute;
   left: 50%;
