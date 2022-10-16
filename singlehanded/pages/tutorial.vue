@@ -14,12 +14,20 @@
     <div class="h-full flex flex-col justify- w-1/2">
       <div class="h-full bg-amber-100 overflow-y-auto p-2">
         <p>
-          <span class="text-slate-400">{{
-            currentText.substring(0, posInText)
-          }}</span
-          ><span>{{
-            currentText.substring(posInText, currentText.length)
-          }}</span>
+          <span
+            v-for="(c, i) in Array.from(currentText)"
+            :class="
+              i < whatTheyTyped.length &&
+              !spaceDown &&
+              whatTheyTyped.charAt(i) != c
+                ? 'text-red-400'
+                : i < posInText
+                ? 'text-slate-400'
+                : ''
+            "
+            :key="i"
+            >{{ c }}</span
+          >
         </p>
       </div>
       <div class="h-full bg-amber-200">
