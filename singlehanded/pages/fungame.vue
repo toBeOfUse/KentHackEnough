@@ -44,8 +44,8 @@
         <div v-if="intro" id="intro">
           <p>
             This is like a rhythm game where you press the keys that come
-            towards your virtual fingers, in order to type the selected text in
-            the little text box below. Have fun.
+            towards your virtual fingers, in order to type your chosen piece of
+            text in the little text box below. Have fun.
           </p>
           <button @click="startGame">GO</button>
         </div>
@@ -58,8 +58,8 @@
               getShapeFractionDone(shape) > 0.9 &&
               !shape.won &&
               !shape.isMeta &&
-              !shape.letter == ' ' &&
-              !shape.letter == 'space'
+              shape.letter !== ' ' &&
+              shape.letter != 'space'
                 ? 'red'
                 : '',
           }"
@@ -333,6 +333,7 @@ export default {
   position: absolute;
   background-color: blue;
   opacity: 0.5;
+  font-size: 200%;
 }
 .key {
   position: absolute;
