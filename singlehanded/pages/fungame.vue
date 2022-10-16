@@ -19,6 +19,9 @@
         <br />
         <input type="radio" id="left" :value="false" v-model="rightHand" />
         <label for="left">Use Left Hand</label>
+        <span class="text-sm underline block"
+          ><a href="/">(go back home)</a></span
+        >
       </div>
     </div>
     <div class="h-full flex flex-col w-1/2">
