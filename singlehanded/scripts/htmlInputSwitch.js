@@ -1,4 +1,4 @@
-import keymap from "./keymap";
+import { keymap } from "./keymap";
 function typeInTextarea(newText, el = document.activeElement) {
   const [start, end] = [el.selectionStart, el.selectionEnd];
   el.setRangeText(newText, start, end, "end");
@@ -8,7 +8,7 @@ function backspace(el = document.activeElement) {
     el.setRangeText("", el.selectionStart - 1, el.selectionStart, "end");
   }
 }
-function init() {
+function init(callback) {
   let space = false;
   let usedSpace = false;
   function keyListener(event) {
@@ -17,6 +17,17 @@ function init() {
       event.ctrlKey ||
       event.altKey
     ) {
+      if (event.key == "Backspace") {
+        const el = document.activeElement;
+        if (
+          callback &&
+          (el.tagName.toLowerCase() == "input" ||
+            el.tagName.toLowerCase() == "textarea")
+        ) {
+          console.log("backspace callback");
+          callback(el.value);
+        }
+      }
       return;
     }
     event.stopImmediatePropagation();
@@ -41,6 +52,7 @@ function init() {
         typeInTextarea(event.key);
       }
     }
+    callback && callback(event.target.value);
   }
   window.addEventListener("keydown", keyListener, true);
   window.addEventListener("keyup", keyListener, true);
