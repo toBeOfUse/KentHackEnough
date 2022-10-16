@@ -1,30 +1,52 @@
 <template>
   <div class="flex flex-col p-5 max-w-lg m-auto max-h-screen">
-    <h1 class="text-2xl font-bold">One-Handed Word Processor</h1>
-    <div class="flex flex-row block my-4">
-      <button @click="editor && editor.chain().focus().toggleBold().run()">
-        Bold
-      </button>
-      <button @click="editor && editor.chain().focus().toggleItalic().run()">
-        Italic
-      </button>
-      <button @click="editor.chain().focus().toggleHeading({ level: 1 }).run()">
-        h1
-      </button>
+    <h1 class="text-2xl font-bold inline">One-Handed Word Processor</h1>
+    <span class="text-sm underline"><a href="/">(go back home)</a></span>
+    <div class="block my-4 flex flex-col flex-shrink overflow-y-auto relative">
+      <div class="p-2 border-2 rounded-lg border-black">
+        <div class="flex flex-row">
+          <button @click="editor && editor.chain().focus().toggleBold().run()">
+            <strong>B</strong>
+          </button>
+          <button
+            @click="editor && editor.chain().focus().toggleItalic().run()"
+          >
+            <em>I</em>
+          </button>
+          <button
+            class="underline"
+            @click="editor && editor.chain().focus().toggleUnderline().run()"
+          >
+            U
+          </button>
+          <button
+            @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
+          >
+            H1
+          </button>
+          <button
+            @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
+          >
+            H2
+          </button>
+          <button
+            @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
+          >
+            H3
+          </button>
+        </div>
+        <client-only>
+          <editor-content :editor="editor" />
+        </client-only>
+      </div>
     </div>
-    <client-only>
-      <editor-content
-        :editor="editor"
-        class="shrink overflow-y-auto"
-        ref="editorElement"
-      />
-    </client-only>
     <keyboard-graphic width="100%" height="auto" class="my-2 shrink-0" />
   </div>
 </template>
 
 <script>
 import { Editor, EditorContent } from "@tiptap/vue-2";
+import Underline from "@tiptap/extension-underline";
 import StarterKit from "@tiptap/starter-kit";
 import { keymap } from "../scripts/keymap.js";
 import KeyboardGraphic from "~/assets/keyboard.vue.svg";
@@ -43,12 +65,13 @@ export default {
 
   mounted() {
     this.editor = new Editor({
-      content: `<h1>Try it out!</h1><p>This rich text editor will let you practice your one-handed typing skills.
+      content: `<h1>Try it out!</h1><p>This text editor will let you practice your one-handed typing skills.
         Remember, as you hold space, the keyboard is mirrored and the letters you would normally type with your
         left hand should now be typed with your right - and vice versa. The mirrored layout means that you will
-        transfer your muscle memory from e.g. your left pinky to your right pinky - surprisingly smoothly.</p>
-        <p>Try typing some text below this:</p><p></p>`,
-      extensions: [StarterKit],
+        transfer your muscle memory from e.g. your left pinky to your right pinky - surprisingly smoothly.
+        With the graphic below, you can see how the keys change while you type.</p>
+        <p>Try typing some text underneath here:</p><p></p>`,
+      extensions: [StarterKit, Underline],
     });
 
     const type = (text) => {
@@ -148,6 +171,14 @@ button {
   margin: 2px;
   padding: 2px;
   border: 1px solid black;
+  min-width: 25px;
+  text-align: center;
+}
+button:first-of-type {
+  margin-left: 0px;
+}
+button:nth-of-type(3) {
+  margin-right: 12px;
 }
 </style>
 
@@ -155,12 +186,17 @@ button {
 .ProseMirror {
   width: 100%;
   min-height: 200px;
-  border: 1px solid black;
-  border-radius: 3px;
-  padding: 2px;
+  padding: 8px;
+  margin-top: 4px;
 }
 .ProseMirror h1 {
   font-size: 150%;
+}
+.ProseMirror h2 {
+  font-size: 130%;
+}
+.ProseMirror h3 {
+  font-size: 110%;
 }
 .ProseMirror p {
   margin: 5px 0;
