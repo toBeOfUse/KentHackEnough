@@ -20,7 +20,7 @@
         <label for="left">Use Left Hand</label>
       </div>
     </div>
-    <div class="h-full flex flex-col justify- w-1/2">
+    <div class="h-full flex flex-col w-1/2">
       <div class="h-full bg-amber-100 overflow-y-auto p-2">
         <p>
           <span
@@ -94,8 +94,7 @@
 <script>
 import text from "~/scripts/text.js";
 import init from "~/scripts/htmlInputSwitch.js";
-import { fingers } from "~/scripts/keymap.js";
-import { keymap } from "../scripts/keymap";
+import { sequences } from "~/scripts/stringdissection.js";
 export default {
   data() {
     return {
@@ -111,12 +110,6 @@ export default {
     init((newTyped, spaceDown) => {
       this.whatTheyTyped = newTyped;
       this.spaceDown = spaceDown;
-    });
-    window.addEventListener("keydown", (e) => {
-      if (e.key == " ") this.spaceDown = true;
-    });
-    window.addEventListener("keyup", (e) => {
-      if (e.key == " ") this.spaceDown = false;
     });
   },
   watch: {
@@ -145,34 +138,7 @@ export default {
     },
     nextSequences() {
       const letters = this.nextChars;
-      const getNeedSpace = (l) =>
-        l != " " &&
-        (!(l in fingers) ||
-          (this.rightHand && fingers[l] < 5) ||
-          (!this.rightHand && fingers[l] > 4));
-      const getActualLetter = (letter) =>
-        letter == " "
-          ? "space"
-          : letter in keymap && getNeedSpace(letter)
-          ? keymap[letter]
-          : letter;
-      const result = [
-        {
-          spaceHeld: getNeedSpace(letters[0]),
-          letters: [getActualLetter(letters[0])],
-        },
-      ];
-      for (const letter of letters.slice(1)) {
-        const needSpace = getNeedSpace(letter);
-        const current = result.slice(-1)[0];
-        const actualLetter = getActualLetter(letter);
-        if (needSpace == current.spaceHeld) {
-          current.letters.push(actualLetter);
-        } else {
-          result.push({ letters: [actualLetter], spaceHeld: needSpace });
-        }
-      }
-      return result;
+      return sequences(letters, this.rightHand);
     },
   },
 };
