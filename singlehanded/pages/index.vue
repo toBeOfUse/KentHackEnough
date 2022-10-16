@@ -32,6 +32,9 @@
     <ul class="list-disc px-8">
       <li><a href="/wordprocessor">Try it in-browser.</a></li>
       <li>
+        <a href="/tutorial">Learn with the tutorial</a>
+      </li>
+      <li>
         <a href="/singlehanded.exe">Download it as a Windows executable.</a>
         <span class="text-xs"
           >(Your antivirus might try to block it, sorry)</span
