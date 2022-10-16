@@ -24,8 +24,7 @@ function init(callback) {
           (el.tagName.toLowerCase() == "input" ||
             el.tagName.toLowerCase() == "textarea")
         ) {
-          console.log("backspace callback");
-          callback(el.value);
+          callback(el.value, false);
         }
       }
       return;
@@ -52,7 +51,7 @@ function init(callback) {
         typeInTextarea(event.key);
       }
     }
-    callback && callback(event.target.value);
+    callback && callback(event.target.value, space);
   }
   window.addEventListener("keydown", keyListener, true);
   window.addEventListener("keyup", keyListener, true);

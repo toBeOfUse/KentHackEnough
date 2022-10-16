@@ -6,14 +6,21 @@
         class="underline text-listing cursor-pointer my-2"
         v-for="(t, i) in text"
         :key="i"
-        @click="currentText = i"
+        @click="currentTextIndex = i"
       >
         {{ t.substring(0, 100) }}
       </p>
     </div>
     <div class="h-full flex flex-col justify- w-1/2">
       <div class="h-full bg-amber-100 overflow-y-auto p-2">
-        <p>{{ currentText }}</p>
+        <p>
+          <span class="text-slate-400">{{
+            currentText.substring(0, posInText)
+          }}</span
+          ><span>{{
+            currentText.substring(posInText, currentText.length)
+          }}</span>
+        </p>
       </div>
       <div class="h-full bg-amber-200">
         <textarea
@@ -21,6 +28,7 @@
           style="width: calc(100% - 1rem); height: calc(100% - 1rem)"
           placeholder="copy the above text here..."
           autocomplete="off"
+          ref="typingArea"
         ></textarea>
       </div>
       <div
@@ -34,10 +42,9 @@
         "
       >
         <div
-          v-for="(cs, i) in nextChars"
+          v-for="(cs, i) in nextSequences"
           :key="i"
-          :style="{ backgroundColor: cs.spaceHeld ? 'red' : 'green' }"
-          class="flex flex-row h-full items-center"
+          class="flex flex-row h-full items-center relative"
         >
           <div
             v-for="(c, j) in cs.letters"
@@ -58,6 +65,8 @@
           >
             <span class="floatingspan">{{ c }}</span>
           </div>
+          <div v-if="cs.spaceHeld" class="lower-bracket" />
+          <div v-if="cs.spaceHeld" class="lower-space" />
         </div>
       </div>
     </div>
@@ -65,31 +74,59 @@
 </template>
 
 <script>
-import text from "~/scripts/text.json";
+import text from "~/scripts/text.js";
 import init from "~/scripts/htmlInputSwitch.js";
 import { fingers } from "~/scripts/keymap.js";
 import { keymap } from "../scripts/keymap";
 export default {
   data() {
-    return { text, currentTextIndex: 0, whatTheyTyped: "", rightHand: true };
+    return {
+      text,
+      currentTextIndex: 0,
+      whatTheyTyped: "",
+      rightHand: true,
+      tickerLength: 15,
+      spaceDown: false,
+    };
   },
   mounted() {
-    init((newTyped) => {
+    init((newTyped, spaceDown) => {
       this.whatTheyTyped = newTyped;
+      this.spaceDown = spaceDown;
     });
+    window.addEventListener("keydown", (e) => {
+      if (e.key == " ") this.spaceDown = true;
+    });
+    window.addEventListener("keyup", (e) => {
+      if (e.key == " ") this.spaceDown = false;
+    });
+  },
+  watch: {
+    currentTextIndex() {
+      this.$refs.typingArea.value = "";
+    },
   },
   computed: {
     currentText() {
       return this.text[this.currentTextIndex];
     },
     posInText() {
-      return this.whatTheyTyped.length;
+      if (this.spaceDown && this.whatTheyTyped.slice(-1) == " ") {
+        return this.whatTheyTyped.length - 1;
+      } else {
+        return this.whatTheyTyped.length;
+      }
     },
     nextChars() {
-      const howMany = 15;
-      const letters = Array.from(
-        this.currentText.substring(this.posInText, this.posInText + howMany)
+      return Array.from(
+        this.currentText.substring(
+          this.posInText,
+          this.posInText + this.tickerLength
+        )
       ).map((l) => l.toLowerCase());
+    },
+    nextSequences() {
+      const letters = this.nextChars;
       const getNeedSpace = (l) =>
         l != " " &&
         (!(l in fingers) ||
@@ -138,5 +175,26 @@ export default {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
+}
+.lower-bracket {
+  position: absolute;
+  width: calc(100% - 20px);
+  height: 5px;
+  left: 10px;
+  bottom: 10px;
+  border-left: 2px solid black;
+  border-bottom: 2px solid black;
+  border-right: 2px solid black;
+}
+.lower-space {
+  position: absolute;
+  width: 30px;
+  height: 10px;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  border: 2px solid black;
+  border-radius: 3px;
 }
 </style>
