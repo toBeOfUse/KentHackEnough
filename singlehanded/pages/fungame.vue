@@ -87,10 +87,13 @@ export default {
     timerStartedAt: -1,
     currentTimer: -1,
     timerID: -1,
+    letterDuration: 0.08,
+    spaceBeforeLetter: 0.4,
   }),
   mounted() {
     init();
     this.startTimer();
+    window.stopTimer = () => clearInterval(this.timerID);
   },
   methods: {
     startTimer() {
@@ -110,8 +113,8 @@ export default {
       return {
         top: fractionDone * 100 - heightPercent + "%",
         left: cols[shape.column] + "%",
-        transform: "translate(-50%, -50%)",
-        height: shape.length == 1 ? "8%" : heightPercent + "%",
+        transform: "translateX(-50%)",
+        height: heightPercent + "%",
         width: "8%",
       };
     },
@@ -151,15 +154,20 @@ export default {
         if (seq.spaceHeld) {
           shapes.push({
             column: 0,
-            contactTime: from - 0.2,
-            length: seq.letters.length + 0.2,
+            contactTime: from - this.spaceBeforeLetter,
+            length:
+              from +
+              this.letterDuration +
+              this.ticksBetweenLetters * (seq.letters.length - 1) +
+              this.spaceBeforeLetter -
+              (from - this.spaceBeforeLetter),
             letter: " ",
           });
         }
         for (const l of seq.letters) {
           shapes.push({
             contactTime: from,
-            length: 1,
+            length: this.letterDuration,
             letter: l,
             column:
               l == "space"
@@ -208,7 +216,7 @@ export default {
 #dest1 {
   left: 15%;
   height: 5%;
-  bottom: 5%;
+  bottom: 15%;
 }
 #dest2 {
   left: 45%;
