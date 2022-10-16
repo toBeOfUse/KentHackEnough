@@ -13,6 +13,7 @@
         </p>
       </div>
       <div class="w-full">
+        <p>Points: {{ points }}!</p>
         <input type="radio" id="right" :value="true" v-model="rightHand" />
         <label for="right">Use Right Hand</label>
         <br />
@@ -52,10 +53,35 @@
         </div>
         <div class="dest-cont">
           <img src="spacebar.svg" id="dest1" />
+          <img
+            src="sparkle.gif"
+            id="dest1"
+            v-if="sparkleEnds[0] >= elapsedTicks"
+          />
           <img src="finger.svg" id="dest2" />
+          <img
+            src="sparkle.gif"
+            id="dest2"
+            v-if="sparkleEnds[1] >= elapsedTicks"
+          />
           <img src="finger.svg" id="dest3" />
+          <img
+            src="sparkle.gif"
+            id="dest3"
+            v-if="sparkleEnds[2] >= elapsedTicks"
+          />
           <img src="finger.svg" id="dest4" />
+          <img
+            src="sparkle.gif"
+            id="dest4"
+            v-if="sparkleEnds[3] >= elapsedTicks"
+          />
           <img src="finger.svg" id="dest5" />
+          <img
+            src="sparkle.gif"
+            id="dest5"
+            v-if="sparkleEnds[4] >= elapsedTicks"
+          />
         </div>
       </div>
       <div class="w-full bg-amber-100">
@@ -81,17 +107,28 @@ export default {
     text,
     rightHand: true,
     currentTextIndex: 0,
-    currentTextPos: 0,
-    secondsPerTick: 1.5,
-    ticksBetweenLetters: 1,
+    secondsPerTick: 2,
+    ticksBetweenLetters: 0.75,
     timerStartedAt: -1,
     currentTimer: -1,
     timerID: -1,
     letterDuration: 0.08,
     spaceBeforeLetter: 0.4,
+    sparkleEnds: [-1, -1, -1, -1, -1],
+    points: 0,
   }),
   mounted() {
-    init();
+    init((result, spacePressed, key, eventType) => {
+      if (eventType == "keyup") {
+        return;
+      }
+      for (const s of this.scorableShapes) {
+        if (s.letter == key) {
+          this.sparkleEnds[s.column] = this.elapsedTicks + 0.5;
+          this.points += 1;
+        }
+      }
+    });
     this.startTimer();
     window.stopTimer = () => clearInterval(this.timerID);
   },
@@ -106,8 +143,11 @@ export default {
     stopTimer() {
       clearInterval(this.timerID);
     },
+    getShapeFractionDone(shape) {
+      return this.elapsedTicks - shape.contactTime - 1;
+    },
     getShapeGeometry(shape) {
-      const fractionDone = this.elapsedTicks - shape.contactTime - 1;
+      const fractionDone = this.getShapeFractionDone(shape);
       const cols = [15, 45, 60, 75, 90];
       const heightPercent = shape.length * 100;
       return {
@@ -123,6 +163,9 @@ export default {
     currentText() {
       return this.text[this.currentTextIndex];
     },
+    currentTextPos() {
+      return 0;
+    },
     upcomingText() {
       return this.currentText.substring(
         this.currentTextPos,
@@ -135,6 +178,12 @@ export default {
     },
     activeInterval() {
       return [this.elapsedTicks - 5, this.elapsedTicks + 5];
+    },
+    scorableShapes() {
+      return this.activeShapes.filter((s) => {
+        const f = this.getShapeFractionDone(s);
+        return f > 0.75 && f < 0.95;
+      });
     },
     activeShapes() {
       const interval = this.activeInterval;
