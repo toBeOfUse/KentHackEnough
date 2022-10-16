@@ -30,19 +30,36 @@
           overflow-hidden
           whitespace-nowrap
           p-2
-          text-lg
+          text-xl
           flex flex-row
           items-center
-          pl-32
         "
       >
-        {{ upcomingText }}
+        <strong class="mr-8">Oncoming text:</strong> {{ upcomingText }}
       </div>
       <div class="h-full w-full bg-amber-200 relative overflow-hidden">
+        <div v-if="intro" id="intro">
+          <p>
+            This is like a rhythm game where you press the keys that come
+            towards your virtual fingers, in order to type the selected text in
+            the little text box below. Have fun.
+          </p>
+          <button @click="startGame">GO</button>
+        </div>
         <div
           v-for="shape in activeShapes"
           :key="shape.from"
-          :style="getShapeGeometry(shape)"
+          :style="{
+            ...getShapeGeometry(shape),
+            backgroundColor:
+              getShapeFractionDone(shape) > 0.9 &&
+              !shape.won &&
+              !shape.isMeta &&
+              !shape.letter == ' ' &&
+              !shape.letter == 'space'
+                ? 'red'
+                : '',
+          }"
           :class="
             (shape.column == 0 && rightHand) ||
             (shape.column == 4 && !rightHand)
@@ -70,7 +87,7 @@
             />
             <img
               :key="i + 'sparkle'"
-              src="sparkle.gif"
+              src="/sparkle.gif"
               :style="{
                 left: col.pos + '%',
                 height: col.height + '%',
@@ -82,11 +99,11 @@
           </template>
         </div>
       </div>
-      <div class="w-full bg-amber-100">
+      <div class="w-full bg-amber-100 h-12">
         <input
-          class="resize-none m-2"
+          class="resize-none m-2 text-lg p-2"
           style="width: calc(100% - 1rem); height: calc(100% - 1rem)"
-          placeholder="enter your letters here!"
+          placeholder="to play, type the indicated letters here!"
           autocomplete="off"
           ref="typingArea"
         />
@@ -114,6 +131,7 @@ export default {
     spaceBeforeLetter: 0.4,
     sparkleEnds: [-1, -1, -1, -1, -1],
     points: 0,
+    intro: true,
   }),
   mounted() {
     init((result, spacePressed, key, eventType) => {
@@ -121,16 +139,22 @@ export default {
         return;
       }
       for (const s of this.scorableShapes) {
-        if (s.letter == key) {
+        if (s.letter == key && (spacePressed || !s.needsSpace)) {
           this.sparkleEnds[s.column] = this.elapsedTicks + 0.5;
           this.points += 1;
+          s.won = true;
         }
       }
     });
-    this.startTimer();
     window.stopTimer = () => clearInterval(this.timerID);
+    this.$refs.typingArea.focus();
   },
   methods: {
+    startGame() {
+      this.intro = false;
+      this.startTimer();
+      this.$refs.typingArea.focus();
+    },
     startTimer() {
       this.timerStartedAt = Date.now();
       this.currentTimer = Date.now();
@@ -277,6 +301,7 @@ export default {
             length: this.letterDuration,
             letter: l,
             column,
+            needsSpace: seq.spaceHeld,
           });
           from += this.ticksBetweenLetters;
         }
@@ -316,6 +341,28 @@ export default {
   position: absolute;
   /* bottom: 0; */
   transform: translateX(-50%);
+}
+#intro {
+  position: absolute;
+  width: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+#intro button {
+  background-color: lightgray;
+  border-radius: 3px;
+  border: 1px solid black;
+  padding: 3px;
+  margin: 5px 0;
 }
 /* #dest1 {
   left: 15%;
